@@ -87,6 +87,12 @@ async function getUserById(uID) {
   const db = await connectToDatabase();
   return await db.collection("users").findOne({ _id: new ObjectId(uID) });
 }
+async function updateUser(uID, updatedUser) {
+  const db = await connectToDatabase();
+  console.log(uID)
+  await db.collection("users").replaceOne({ _id: uID }, updatedUser);
+  return updatedUser;
+}
 
 module.exports = {
   connectToDatabase,
@@ -104,4 +110,5 @@ module.exports = {
   deleteUserById,
   getUserById,
   getOdersByUserId,
+  updateUser,
 };

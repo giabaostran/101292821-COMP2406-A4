@@ -475,7 +475,7 @@ app.get("/users/:uID", async (req, res) => {
 
     // Fetch orders where userId matches the profile being viewed
     const userOrders = await db.getOdersByUserId(req.params.uID);
-    console.log(userOrders);
+
     res.render("userProfile", {
       targetUser,
       orders: userOrders,
@@ -492,18 +492,17 @@ app.put("/users/:uID", async (req, res) => {
   if (!req.session.user) return res.status(403).json({ error: "Unauthorized" });
 
   try {
-    const { username, password, privacy } = req.body;
-    const mongoDb = await db.connectToDatabase();
-
-    await mongoDb
-      .collection("users")
-      .updateOne(
-        { _id: new ObjectId(req.params.uID) },
-        { $set: { username, password, privacy } },
-      );
+    const user = await db.getUserById(req.session.user.id);
+    console.log(user);
+    ["username", "password", "privacy"].forEach((field) => {
+      if (req.body[field] !== undefined) user[field] = req.body[field];
+    });
+    console.log(user);
+    await db.updateUser(user._id, user);
 
     res.json({ success: true });
   } catch (err) {
+    console.log(err);
     res.status(500).json({ error: "Failed to update database." });
   }
 });
