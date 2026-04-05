@@ -1,13 +1,13 @@
 const path = require("path");
 const express = require("express");
 const session = require("express-session");
-const db = require("./db"); // this library contains methods for interacting with database
+const db = require("./db"); // this library provide interface to interact with mongodb
 
 const app = express();
 const PORT = 3000;
 app.use(
   session({
-    secret: "diddy-chan",
+    secret: "diddy-kun",
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false },
@@ -22,11 +22,8 @@ app.use("/scripts", express.static(path.join(__dirname, "scripts")));
 app.use("/styles", express.static(path.join(__dirname, "styles")));
 app.use("/images", express.static(path.join(__dirname, "images")));
 
-// Connect to a database
-db.connectToDatabase().catch(console.error);
-
 // ------------------------------------------------------------------
-// Stats Helper Functions (Modified to accept arrays as parameters)
+// DONE: Helper Functions To Calc STATS info
 // ------------------------------------------------------------------
 function calcTotalMovies(serviceName, orderHistory) {
   let count = 0;
@@ -93,25 +90,28 @@ function findMostPopular(serviceName, orderHistory, streamingServices) {
 }
 
 // ---------------------------------
-// Routes (Now using async/await)
+// Routes
 // ---------------------------------
 app.get("/", (req, res) => {
   res.render("index", { user: req.session.user });
 });
 
 app.get("/order", async (req, res) => {
-  // Only allow logged in users
+  // Force user to log-in if they want to make an order
   if (!req.session.user) return res.redirect("/login");
 
   try {
     const streamingServices = await db.getServices();
 
-    let basicServiceData = streamingServices.map((s) => ({
-      id: s.id,
-      name: s.name,
-      minOrder: s.minOrder,
-      serviceFee: s.serviceFee,
-    }));
+    let basicServiceData = streamingServices.map((s) => {
+      console.log(s.id )
+      return({
+        id: s.id,
+        name: s.name,
+        minOrder: s.minOrder,
+        serviceFee: s.serviceFee,
+      });
+    });
 
     res.render("orderForm", { basicServiceData, user: req.session.user });
   } catch (err) {
@@ -412,7 +412,9 @@ app.post("/register", async (req, res) => {
 });
 
 app.get("/users", async (req, res) => {
-  if (!req.session.user) return res.status(403).send("Unauthorized");
+  if (!req.session.user || !req.session.user.admin) {
+    return res.status(403).send("Unauthorized: Admins only.");
+  }
   try {
     const allUsers = await db.getAllUsers();
 
