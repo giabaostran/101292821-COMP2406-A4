@@ -52,6 +52,11 @@ async function getOrders() {
   return await db.collection("orders").find({}).toArray();
 }
 
+async function getOdersByUserId(uID) {
+  const db = await connectToDatabase();
+  return await db.collection("orders").find({ userId: uID }).toArray();
+}
+
 // --- User Operations ---
 async function addUser(newUser) {
   const db = await connectToDatabase();
@@ -78,6 +83,11 @@ async function deleteUserById(uID) {
   return await db.collection("users").deleteOne({ _id: new ObjectId(uID) });
 }
 
+async function getUserById(uID) {
+  const db = await connectToDatabase();
+  return await db.collection("users").findOne({ _id: new ObjectId(uID) });
+}
+
 module.exports = {
   connectToDatabase,
   getServices,
@@ -92,4 +102,6 @@ module.exports = {
   getUserByCredentials,
   findUserByUsername,
   deleteUserById,
+  getUserById,
+  getOdersByUserId,
 };

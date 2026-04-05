@@ -144,7 +144,6 @@ app.get("/stats", async (req, res) => {
 
     res.render("stats", { statsData, user: req.session.user });
   } catch (err) {
-    console.log(err);
     res.status(500).send("Error calculating statistics");
   }
 });
@@ -439,7 +438,6 @@ app.delete("/users/:uID", async (req, res) => {
   if (!req.session.user) return res.status(403).json({ error: "Unauthorized" });
   try {
     const result = await db.deleteUserById(req.params.uID);
-    console.log(result);
 
     if (result.deletedCount === 1) {
       if (req.session.user.id === req.params.uID) {
@@ -448,12 +446,65 @@ app.delete("/users/:uID", async (req, res) => {
       }
       res.send("User has been deleted");
     } else {
-      console.log("What")
+      console.log("What");
       res.status(404).json({ error: "User not found." });
     }
   } catch (err) {
-    console.log(err);
     res.status(500).json({ error: "Database error" });
+  }
+});
+
+// GET User Profile
+app.get("/users/:uID", async (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+
+  try {
+    const targetUser = await db.getUserById(req.params.uID);
+
+    if (!targetUser) {
+      return res.status(404).send("User not found");
+    }
+
+    // Logic: Allow if Public OR if current user is the owner OR if current user is Admin
+    const isOwner = req.session.user.id.toString() === req.params.uID;
+    const isAdmin = req.session.user.admin;
+
+    if (targetUser.privacy && !isOwner && !isAdmin) {
+      return res.status(403).send("This profile is private.");
+    }
+
+    // Fetch orders where userId matches the profile being viewed
+    const userOrders = await db.getOdersByUserId(req.params.uID);
+    console.log(userOrders);
+    res.render("userProfile", {
+      targetUser,
+      orders: userOrders,
+      user: req.session.user, // Required for header.pug
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error loading profile.");
+  }
+});
+// ========================================================================================== MIGRATE DB
+// PUT Update User
+app.put("/users/:uID", async (req, res) => {
+  if (!req.session.user) return res.status(403).json({ error: "Unauthorized" });
+
+  try {
+    const { username, password, privacy } = req.body;
+    const mongoDb = await db.connectToDatabase();
+
+    await mongoDb
+      .collection("users")
+      .updateOne(
+        { _id: new ObjectId(req.params.uID) },
+        { $set: { username, password, privacy } },
+      );
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update database." });
   }
 });
 

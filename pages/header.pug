@@ -7,11 +7,14 @@ header
     nav
         a(href="/") Home
         if user
-            a(href="/users") Users
             a(href="/order") Order Form
             a(href="/stats") Statistics
             if user.admin
                 a(href="/services") Services
+                a(href="/users") Users
+
+
+            a(href=`/users/${user.id}`) Profile
             a(href="/logout") Logout
         else
             a(href="/login") Login

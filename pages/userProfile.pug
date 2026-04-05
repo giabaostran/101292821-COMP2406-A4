@@ -1,0 +1,60 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="utf-8")
+        title User Profile - #{targetUser.username}
+        link(rel="stylesheet", href="/styles/styles.css")
+        link(rel="stylesheet", href="/styles/editStyles.css")
+        script(src="/scripts/userProfile.js", defer)
+    body
+        include header.pug
+
+        main.container
+            section.service-card.centered
+                h2 User Settings
+                div.form-container
+                    .form-row
+                        label(for="username") Username:
+                        input#username(type="text", value=targetUser.username, required)
+                    .form-row
+                        label(for="password") Password:
+                        input#password(type="password", value=targetUser.password, required)
+                    .form-row
+                        label(for="confirmPassword") Confirm Password:
+                        input#confirmPassword(type="password", value=targetUser.password, required)
+                    .form-row
+                        label(for="privacy") Privacy Mode (On/Off):
+                        input#privacy(type="checkbox", checked=targetUser.privacy)
+                    button#saveChanges(type="button") Save Changes
+            br
+            br
+            br
+            section.services-card.movies-list
+    if orders.length > 0
+        //- The wrapper div handles the scrolling
+
+        .table-responsive
+            table.order-table
+                thead
+                    tr
+                        th Order ID
+                        th Date
+                        th Total
+                        th Movies Ordered
+                tbody
+                    each order in orders
+                        tr
+                            td.order-id-cell= order._id
+                            td= new Date(order.orderDate).toLocaleDateString()
+                            td.total-cell $#{order.total.toFixed(2)}
+                            td
+                                .ordered-movies-list
+                                    each serviceMovies, serviceName in order.movies
+                                        if serviceMovies && serviceMovies.length > 0
+                                            .service-group
+                                                span.service-name= serviceName
+                                                ul.movie-items
+                                                    each movie in serviceMovies
+                                                        li #{movie.title} (#{movie.year})
+    else
+        p.centered No orders found for this user.
