@@ -1,0 +1,31 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        title Register - Movie Weekend Planner
+        link(rel="stylesheet", href="/styles/styles.css")
+    body
+        include header.pug
+
+        main.container
+            .centered
+                h2 Create an Account
+                
+                if error
+                    p.error-message(style="color: red; font-weight: bold;text-align:center;")= error
+
+                form#registerForm(action="/register", method="POST")
+                    .form-row(style="justify-content: center; margin-bottom: 15px;")
+                        label(for="username") Username:&nbsp;
+                        input#username(type="text", name="username", required)
+                    
+                    .form-row(style="justify-content: center; margin-bottom: 15px;")
+                        label(for="password") Password:&nbsp;
+                        input#password(type="password", name="password", required)
+                    
+                    .form-row(style="justify-content: center; margin-top: 20px;")
+                        button(type="submit") Register
+                
+                br
+                p(style="text-align:center;") Already have an account? 
+                    a(href="/login") Sign in here

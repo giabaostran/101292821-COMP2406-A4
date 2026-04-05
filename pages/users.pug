@@ -1,0 +1,42 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="utf-8")
+        title User Directory
+        link(rel="stylesheet", href="/styles/styles.css")
+        link(rel="stylesheet", href="/styles/editStyles.css")
+        //- Include the new script for handling deletes
+        script(src="/scripts/users.js", defer)
+
+    body
+        include header.pug
+
+        main.container
+            section.services-card.movies-list
+                h2 Registered Users
+                table
+                    thead
+                        tr
+                            th Username
+                            th Remove
+                    tbody
+                        each u in users
+                            tr
+                                td
+                                    div.service-card
+                                        if u.privacy
+                                            //- Private User: Faded text, no link
+                                            span(style="color: #999; cursor: not-allowed; font-style: italic;", title="This profile is private")= u.username
+                                        else
+                                            //- Public User: Clickable link to their profile
+                                            a(href=`/users/${u._id}`)= u.username
+                                td
+                                    img.remove-user-icon(
+                                        src="/images/remove.svg",
+                                        alt="Remove",
+                                        width="24",
+                                        height="24",
+                                        title="Remove this user",
+                                        data-id=u._id,
+                                        style="cursor: pointer;"
+                                    )

@@ -1,14 +1,17 @@
 header
+    script(src="/scripts/header.js" defer)
     h1 
         img(src="/images/popcornLeft.png", width=50, alt="Popcorn Logo")
         | &nbsp; "Movie Weekend" Planner &nbsp;
         img(src="/images/popcornRight.png", width=50, alt="Popcorn Logo")
-
-        nav
-            a(href="/") Home
+    nav
+        a(href="/") Home
+        if user
+            a(href="/users") Users
             a(href="/order") Order Form
             a(href="/stats") Statistics
-            a(href="/services") Admin
-
-        script(src="/scripts/header.js")
-         
+            if user.admin
+                a(href="/services") Services
+            a(href="/logout") Logout
+        else
+            a(href="/login") Login
